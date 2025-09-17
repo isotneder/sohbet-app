@@ -1,8 +1,6 @@
-// Firebase SDK'larını içeri aktar
-import { initializeApp } from "firebase/app";
-import { getDatabase, ref, push, onChildAdded, set } from "firebase/database";
+// Firebase SDK'ları global olarak yüklendiği için import kullanmıyoruz.
 
-// Firebase Konfigürasyonunu yap
+// Firebase Konfigürasyonu (Bu kısımları değiştirme)
 const firebaseConfig = {
   apiKey: "AIzaSyAsJeUvmWmGDrNYfg9Eq7h-9cCk3IjHLLw",
   authDomain: "isotneder.firebaseapp.com",
@@ -17,52 +15,72 @@ const firebaseConfig = {
 // Firebase uygulamasını başlat
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
+
+// Veritabanındaki 'messages' referansına bağlan
 const messagesRef = ref(db, "messages");
 
 // Kullanıcı adı kontrolü
 const username = localStorage.getItem("chatUser");
 if (!username) {
-  window.location.href = "index.html";
+  window.location.href = "index.html"; // Kullanıcı adı girilmemişse giriş sayfasına yönlendir
 }
 
 // Admin kontrolü (giriş yapan kullanıcı adminse)
 if (username === "admin123") {
-  document.getElementById("clearBtn").style.display = "block";
+  document.getElementById("clearBtn").style.display = "block"; // Admin'in mesajları temizleyebilmesi için butonu göster
 }
 
 // Mesaj gönderme fonksiyonu
 function sendMessage() {
   const msgInput = document.getElementById("messageInput");
-  const text = msgInput.value.trim();
-  if (text === "") return;
+  const text = msgInput.value.trim(); // Mesajı al
+
+  if (text === "") {
+    console.log("Mesaj boş, gönderilemiyor.");
+    return; // Eğer mesaj boşsa, gönderme işlemi yapılmaz
+  }
+
+  // Firebase'e mesajı gönderme
   push(messagesRef, {
     user: username,
     text: text,
     time: Date.now()
+  })
+  .then(() => {
+    console.log("Mesaj başarıyla gönderildi!"); // Mesaj başarıyla gönderildiği zaman konsola yazdırılır
+  })
+  .catch((error) => {
+    console.error("Mesaj gönderilirken bir hata oluştu:", error); // Eğer hata olursa konsola yazdırılır
   });
-  msgInput.value = "";
+
+  msgInput.value = ""; // Mesaj kutusunu temizle
 }
 
-// Mesajları ekrana yazdırma
+// Gelen mesajları ekranda göstermek için fonksiyon
 function displayMessage(data) {
   const msgDiv = document.createElement("div");
   msgDiv.classList.add("message");
-  msgDiv.textContent = data.user + ": " + data.text;
+  msgDiv.textContent = `${data.user}: ${data.text}`;
   document.getElementById("messages").appendChild(msgDiv);
+  console.log("Mesaj ekrana yazıldı:", data); // Mesaj ekrana yazıldığında konsola yazdırılır
 }
 
-// Firebase'den gelen verileri dinleme
+// Firebase'den gelen verileri dinle
 onChildAdded(messagesRef, (snapshot) => {
-  displayMessage(snapshot.val());
+  const message = snapshot.val();
+  console.log("Yeni mesaj alındı:", message); // Yeni mesaj geldiğinde konsola yazdırılır
+  displayMessage(message); // Yeni mesajı ekranda göster
 });
 
 // Admin'in sohbeti temizlemesi
 function clearChat() {
   if (confirm("Tüm mesajları silmek istediğine emin misin?")) {
-    set(messagesRef, {});
-    document.getElementById("messages").innerHTML = "";
+    set(messagesRef, {}); // Veritabanındaki mesajları temizler
+    document.getElementById("messages").innerHTML = ""; // Ekrandaki mesajları siler
+    console.log("Tüm mesajlar silindi!"); // Konsola yazdırılır
   }
 }
 
+// Fonksiyonu global olarak tanımla
 window.sendMessage = sendMessage;
 window.clearChat = clearChat;
