@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Grup Sohbet</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h2>Grup Sohbet</h2>
+  <div id="messages"></div>
+
+  <div class="input-box">
+    <input type="text" id="messageInput" placeholder="Mesaj yaz...">
+    <button onclick="sendMessage()">Gönder</button>
+  </div>
+
+  <button id="clearBtn" style="display:none;" onclick="clearChat()">Tüm Mesajları Sil (Admin)</button>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
